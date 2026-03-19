@@ -846,42 +846,431 @@ while True:
 <section id="domain3">
   <h2>D3: Claude Code 設定 &amp; ワークフロー（20%）</h2>
 
+  <div class="warning-box">
+    <span class="label">試験での重要度</span>
+    <p>このドメインは<span class="big-red">全60問中 約12問</span>が出題されます。CLAUDE.md、カスタムコマンド、プランモード、CI/CD統合の4つを深く理解する必要があります。</p>
+  </div>
+
   <h3>超初心者向け解説: Claude Codeとは？</h3>
   <div class="important-box">
     <span class="label">日常の例で理解する</span>
     <p><strong>Claude Code</strong> = あなたのPCの中で動く<span class="highlight">AIプログラマー助手</span></p>
     <p>ターミナルで <code>claude</code> と打つだけで起動。ファイルの読み書き、コード修正、テスト実行、Git操作まで全部やってくれます。</p>
+    <p style="margin-top:12px;">普通のChatGPTやClaude.aiとの違い:</p>
+    <table style="margin-top:8px;">
+      <tr><th>機能</th><th>Webチャット</th><th>Claude Code</th></tr>
+      <tr><td>ファイルの読み書き</td><td>できない</td><td><span style="color:#22c55e;font-weight:700;">できる</span></td></tr>
+      <tr><td>コマンド実行</td><td>できない</td><td><span style="color:#22c55e;font-weight:700;">できる</span></td></tr>
+      <tr><td>Git操作</td><td>できない</td><td><span style="color:#22c55e;font-weight:700;">できる</span></td></tr>
+      <tr><td>プロジェクト全体の理解</td><td>限定的</td><td><span style="color:#22c55e;font-weight:700;">全ファイル参照可能</span></td></tr>
+      <tr><td>自動でコード修正</td><td>できない</td><td><span style="color:#22c55e;font-weight:700;">できる</span></td></tr>
+    </table>
   </div>
 
-  <h3>CLAUDE.md の階層構造（超重要！）</h3>
+  <!-- ==================== -->
+  <!-- トピック1: CLAUDE.md -->
+  <!-- ==================== -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #7c3aed;padding-bottom:8px;">トピック1: CLAUDE.md 設定（超重要）</h3>
+
+  <div class="success-box">
+    <span class="label">一言でいうと</span>
+    <p><span class="big-green">CLAUDE.md = Claudeへの「仕事のルールブック」</span></p>
+    <p>プロジェクトに置いておくと、Claude Codeがセッション開始時に<span class="highlight">毎回自動で読み込む</span>ファイルです。</p>
+  </div>
+
+  <h4 style="color:#a78bfa;">CLAUDE.md の階層構造（公式ドキュメント準拠）</h4>
+  <p>CLAUDE.mdは<span class="highlight">3つのレベル</span>で設定でき、それぞれ影響範囲が異なります。</p>
+
   <pre>
-# CLAUDE.md は3つのレベルで設定できる
-
-~/.claude/CLAUDE.md          # グローバル（全プロジェクト共通）
-プロジェクト/CLAUDE.md       # プロジェクト単位
-プロジェクト/src/CLAUDE.md   # フォルダ単位（そのフォルダの作業時のみ有効）
-
-# 優先順位: フォルダ > プロジェクト > グローバル
+📁 パソコン全体（グローバル設定）
+├── ~/.claude/CLAUDE.md              ← 全プロジェクト共通のルール
+│
+📁 プロジェクト（プロジェクト設定）
+├── my-project/CLAUDE.md             ← このプロジェクト専用のルール
+├── my-project/.claude/rules/*.md    ← ルールファイル（複数ファイルに分割可能）
+│
+📁 サブフォルダ（フォルダ設定）
+├── my-project/src/CLAUDE.md         ← src/ で作業するときだけ有効
+├── my-project/tests/CLAUDE.md       ← tests/ で作業するときだけ有効
   </pre>
 
-  <h3>出題されるトピック</h3>
-  <div class="card-grid">
-    <div class="card">
-      <h4>CLAUDE.md 設定</h4>
-      <p>プロジェクトルール、コーディング規約、使用技術の指定。階層構造の理解が必須。</p>
-    </div>
-    <div class="card">
-      <h4>カスタムコマンド</h4>
-      <p><code>.claude/commands/</code>にMDファイルを置いて独自の<code>/コマンド</code>を作成。</p>
-    </div>
-    <div class="card">
-      <h4>プランモード</h4>
-      <p>Claude に「まず計画を立ててから実行」させるモード。大規模変更時に必須。</p>
-    </div>
-    <div class="card">
-      <h4>CI/CD統合</h4>
-      <p><code>claude -p "指示" --output-format json</code> で非対話的にClaudeを利用。自動化パイプラインに組み込む。</p>
-    </div>
+  <div class="important-box">
+    <span class="label">試験で問われるポイント</span>
+    <ul>
+      <li><strong>読み込み順序:</strong> グローバル → プロジェクト → フォルダ の順で読み込まれる</li>
+      <li><strong>優先順位:</strong> フォルダ &gt; プロジェクト &gt; グローバル（より具体的な設定が勝つ）</li>
+      <li><strong>.claude/rules/:</strong> ルールをファイルごとに分割して管理できる。<code>paths:</code> フロントマターで特定のファイルにだけ適用することも可能</li>
+      <li><strong>除外設定:</strong> <code>claudeMdExcludes</code> で不要なCLAUDE.mdを無視できる（モノレポで重要）</li>
+    </ul>
+  </div>
+
+  <h4 style="color:#a78bfa;">CLAUDE.md の書き方 - 実践例</h4>
+  <pre>
+# プロジェクトルール（CLAUDE.md の例）
+
+## 技術スタック
+- 言語: TypeScript (strict mode)
+- フレームワーク: Next.js 15 (App Router)
+- スタイリング: Tailwind CSS
+- テスト: Vitest + React Testing Library
+
+## コーディング規約
+- 変数名はキャメルケース（例: userName）
+- コンポーネントはPascalCase（例: UserProfile）
+- 関数は必ず型注釈をつける
+- console.logは本番コードに残さない
+
+## ビルドコマンド
+- 開発: npm run dev
+- テスト: npm test
+- ビルド: npm run build
+
+## 禁止事項
+- any型の使用禁止
+- .envファイルをコミットしない
+- 外部APIキーをハードコードしない
+  </pre>
+  <p style="color:#a5b4fc;font-size:0.9rem;">このように書いておくと、Claude Codeは毎回このルールに従ってコードを書いてくれます。</p>
+
+  <h4 style="color:#a78bfa;">パスごとのルール適用（.claude/rules/）</h4>
+  <p>公式ドキュメントでは、<code>.claude/rules/</code>ディレクトリにYAMLフロントマター付きのMDファイルを置いて、<span class="highlight">特定のファイルにだけルールを適用</span>できます。</p>
+  <pre>
+# .claude/rules/api-rules.md
+
+---
+paths:
+  - "src/api/**/*.ts"     ← src/api/ 内のTypeScriptファイルにだけ適用
+---
+
+APIエンドポイントでは必ず以下を守ること:
+- 入力バリデーションにZodを使用
+- エラーレスポンスは統一フォーマットで返す
+- レートリミットを設定する
+  </pre>
+
+  <h4 style="color:#a78bfa;">自動メモリ（Auto Memory）</h4>
+  <div class="glossary-item">
+    <dt>自動メモリとは？</dt>
+    <dd>Claude Codeが作業中に<span class="highlight">自動で学習したこと</span>（ビルドコマンド、デバッグの知見など）を次のセッションでも覚えている仕組み。あなたが何も書かなくても、Claudeが勝手に学習メモを保存してくれます。</dd>
+  </div>
+
+  <!-- ======================== -->
+  <!-- トピック2: カスタムコマンド -->
+  <!-- ======================== -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #7c3aed;padding-bottom:8px;margin-top:50px;">トピック2: カスタムスラッシュコマンド</h3>
+
+  <div class="success-box">
+    <span class="label">一言でいうと</span>
+    <p><span class="big-green">よく使う作業を「/コマンド名」で一発実行</span>できる仕組み</p>
+    <p>料理のレシピカードのようなもの。「/カレー」と言えば、材料の準備から盛り付けまでの手順が自動で実行される。</p>
+  </div>
+
+  <h4 style="color:#a78bfa;">カスタムコマンドの作り方</h4>
+  <p><code>.claude/commands/</code>フォルダにマークダウンファイルを置くだけ！</p>
+
+  <pre>
+📁 プロジェクト/
+├── .claude/
+│   └── commands/
+│       ├── review.md        ← /review で実行される
+│       ├── deploy.md        ← /deploy で実行される
+│       ├── ci/
+│       │   ├── build.md     ← /build で実行される
+│       │   └── test.md      ← /test で実行される
+│       └── git/
+│           ├── commit.md    ← /commit で実行される
+│           └── pr.md        ← /pr で実行される
+  </pre>
+
+  <h4 style="color:#a78bfa;">コマンドファイルの書き方（YAMLフロントマター）</h4>
+  <p>ファイルの先頭に<span class="highlight">YAMLフロントマター</span>（設定情報）を書けます。</p>
+
+  <pre>
+# .claude/commands/review.md
+
+---
+description: "コードレビューを実行する"     ← コマンドの説明
+allowed-tools: "Read, Bash(git:*)"          ← 使えるツールを制限
+model: "sonnet"                              ← 使用するモデルを指定
+argument-hint: "[ファイルパス]"              ← 引数のヒント
+---
+
+以下の手順でコードレビューを行ってください:
+
+1. 指定されたファイルを読み込む
+2. バグ、セキュリティの問題、パフォーマンスの問題をチェック
+3. 改善提案をリストアップ
+4. 重要度順に並べて報告
+
+レビュー基準:
+- SOLID原則に従っているか
+- エラーハンドリングが適切か
+- テストが書かれているか
+  </pre>
+
+  <div class="important-box">
+    <span class="label">YAMLフロントマターの主要フィールド（試験出題範囲）</span>
+    <table>
+      <tr><th>フィールド</th><th>意味</th><th>例</th></tr>
+      <tr><td><code>description</code></td><td>コマンドの説明文</td><td><code>"PRを作成する"</code></td></tr>
+      <tr><td><code>allowed-tools</code></td><td>使用可能なツールの制限</td><td><code>"Read, Bash(git:*)"</code></td></tr>
+      <tr><td><code>model</code></td><td>使用モデルの指定</td><td><code>"sonnet"</code> / <code>"opus"</code></td></tr>
+      <tr><td><code>argument-hint</code></td><td>引数のヒント表示</td><td><code>"[PR番号] [優先度]"</code></td></tr>
+      <tr><td><code>disable-model-invocation</code></td><td>AI呼び出しなしで実行</td><td><code>true</code></td></tr>
+    </table>
+  </div>
+
+  <h4 style="color:#a78bfa;">スキル（SKILL.md）- 自動発動するコマンド</h4>
+  <p>通常のコマンドは <code>/コマンド名</code> で手動実行しますが、<span class="highlight">スキル（SKILL.md）</span>は条件に合致すると<span class="highlight-yellow">自動的に発動</span>します。</p>
+  <pre>
+# .claude/commands/explain-code/SKILL.md
+
+---
+name: explain-code
+description: コードの仕組みを図解付きで説明する。
+  「これどう動くの？」「仕組みを教えて」と聞かれたら自動発動。
+---
+
+コードを説明するときは必ず以下を含めること:
+
+1. 日常の例えで全体像を説明
+2. ASCII図で構造を描く
+3. ステップバイステップでコードを解説
+4. よくある間違いを指摘
+  </pre>
+
+  <!-- ======================== -->
+  <!-- トピック3: プランモード -->
+  <!-- ======================== -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #7c3aed;padding-bottom:8px;margin-top:50px;">トピック3: プランモード</h3>
+
+  <div class="success-box">
+    <span class="label">一言でいうと</span>
+    <p><span class="big-green">「いきなり作業せず、まず計画書を見せて」モード</span></p>
+    <p>家のリフォームで例えると: いきなり壁を壊し始めるのではなく、まず設計図を見せてもらって「OK」を出してから作業開始する。</p>
+  </div>
+
+  <h4 style="color:#a78bfa;">プランモードの使い方</h4>
+  <pre>
+# 方法1: キーボードショートカット
+Shift+Tab       ← プランモードのON/OFFを切り替え
+
+# 方法2: セッション開始時に指定
+claude --plan    ← 最初からプランモードで起動
+
+# 方法3: 会話の途中で切り替え
+「まず計画を立ててから実行してください」と指示する
+  </pre>
+
+  <h4 style="color:#a78bfa;">プランモードの動作フロー</h4>
+  <div class="important-box">
+    <span class="label">通常モード vs プランモード</span>
+    <p><strong>通常モード:</strong></p>
+    <p>あなた「認証機能を追加して」→ Claude が<span style="color:#ef4444;">すぐにコードを書き始める</span></p>
+
+    <p style="margin-top:16px;"><strong>プランモード:</strong></p>
+    <p>あなた「認証機能を追加して」→ Claude が<span style="color:#22c55e;">計画書を作成</span></p>
+    <pre style="margin:8px 0;">
+## 実装計画
+
+### 1. 認証ミドルウェアの作成
+- src/middleware/auth.ts を新規作成
+- JWTトークンの検証ロジックを実装
+
+### 2. ログインAPIの作成
+- src/api/auth/login.ts を新規作成
+- bcryptでパスワード照合
+
+### 3. 保護ルートの設定
+- 既存のAPIルートにミドルウェアを適用
+
+### 4. テストの追加
+- tests/auth.test.ts を作成
+
+この計画でよろしいですか？
+    </pre>
+    <p>あなた「OK、進めて」→ Claude が計画に沿って実行開始</p>
+  </div>
+
+  <div class="warning-box">
+    <span class="label">試験で問われるポイント</span>
+    <ul>
+      <li><strong>いつプランモードを使うべきか？</strong> → 大規模な変更、複数ファイルにまたがる変更、破壊的変更のとき</li>
+      <li><strong>いつ使わなくてよいか？</strong> → 小さなバグ修正、1ファイルだけの変更、明確な指示のとき</li>
+      <li><strong>プランモードの利点:</strong> 間違った方向に大量のコードを書かれるリスクを防げる</li>
+    </ul>
+  </div>
+
+  <!-- ======================== -->
+  <!-- トピック4: フック（Hooks） -->
+  <!-- ======================== -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #7c3aed;padding-bottom:8px;margin-top:50px;">トピック4: フック（Hooks）</h3>
+
+  <div class="success-box">
+    <span class="label">一言でいうと</span>
+    <p><span class="big-green">Claudeの動作の前後に「自動チェック」を挟む仕組み</span></p>
+    <p>工場のベルトコンベアで例えると: 製品（コード）が次の工程に進む前に、自動で品質検査を入れるイメージ。</p>
+  </div>
+
+  <h4 style="color:#a78bfa;">フックの種類（公式ドキュメント準拠）</h4>
+  <table>
+    <tr><th>フック名</th><th>発動タイミング</th><th>使用例</th></tr>
+    <tr>
+      <td><code>PreToolUse</code></td>
+      <td>ツール使用の<span class="highlight">前</span></td>
+      <td>Bashコマンド実行前に危険なコマンドをブロック</td>
+    </tr>
+    <tr>
+      <td><code>PostToolUse</code></td>
+      <td>ツール使用の<span class="highlight">後</span></td>
+      <td>ファイル編集後に自動フォーマット・Lint実行</td>
+    </tr>
+  </table>
+
+  <h4 style="color:#a78bfa;">フックの設定例（settings.json）</h4>
+  <pre>
+// .claude/settings.json に記述
+
+{
+  "hooks": {
+
+    // ファイル編集後に自動でコードスタイルをチェック
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",       // Write か Edit ツール使用後に発動
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/check-style.sh"  // スタイルチェック実行
+          }
+        ]
+      }
+    ],
+
+    // Bashコマンド実行後にログを記録
+    "PostToolUse": [
+      {
+        "matcher": "Bash",             // Bashツール使用後に発動
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' >> ~/.claude/command-log.txt"
+          }
+        ]
+      }
+    ]
+  }
+}
+  </pre>
+
+  <div class="important-box">
+    <span class="label">試験で問われるポイント</span>
+    <ul>
+      <li><strong>matcher:</strong> どのツールに対してフックを発動するか（<code>"Bash"</code>, <code>"Write|Edit"</code>, <code>"*"</code> など）</li>
+      <li><strong>type:</strong> <code>"command"</code>（シェルコマンド実行）が基本</li>
+      <li><strong>$CLAUDE_PROJECT_DIR:</strong> プロジェクトルートのパスを参照する環境変数</li>
+      <li><strong>timeout:</strong> フックのタイムアウト（デフォルト60秒）</li>
+    </ul>
+  </div>
+
+  <!-- ======================== -->
+  <!-- トピック5: CI/CD統合 -->
+  <!-- ======================== -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #7c3aed;padding-bottom:8px;margin-top:50px;">トピック5: CI/CD統合（非対話モード）</h3>
+
+  <div class="success-box">
+    <span class="label">一言でいうと</span>
+    <p><span class="big-green">Claude を「自動化パイプライン」の一部として使う方法</span></p>
+    <p>普段は対話（チャット）で使いますが、CI/CDでは<span class="highlight">人間なしで自動実行</span>する必要があります。そのための「ヘッドレス（画面なし）モード」です。</p>
+  </div>
+
+  <h4 style="color:#a78bfa;">非対話モードの基本（-p フラグ）</h4>
+  <pre>
+# -p フラグ = 「プロンプトを渡して即実行、結果を出力して終了」
+
+# テキスト出力（人間が読む用）
+claude -p "このコードのバグを見つけて" --output-format text
+
+# JSON出力（プログラムが処理する用）
+claude -p "このコードを分析して" --output-format json
+
+# ストリームJSON（リアルタイム処理用）
+claude -p "ログを解析して" --output-format stream-json
+  </pre>
+
+  <h4 style="color:#a78bfa;">パイプ処理（他のコマンドと連携）</h4>
+  <p>Linuxのパイプ（<code>|</code>）を使って、<span class="highlight">他のツールと連携</span>できます。</p>
+  <pre>
+# ファイルの中身をClaudeに渡して分析結果をファイルに保存
+cat data.txt | claude -p "このデータを要約して" --output-format text > summary.txt
+
+# コードを渡してバグ分析結果をJSONで取得
+cat code.py | claude -p "バグを分析して" --output-format json > analysis.json
+
+# ログファイルからエラーを抽出
+cat error.log | claude -p "エラーの原因を分析して" --output-format json | jq '.result'
+  </pre>
+
+  <h4 style="color:#a78bfa;">GitHub Actions での使い方</h4>
+  <pre>
+# .github/workflows/claude-review.yml
+
+name: Claude Code Review
+on: [pull_request]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Claude でコードレビュー
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_args: "--max-turns 5 --model claude-sonnet-4-6"
+          # ↑ CLIの引数をそのまま渡せる
+  </pre>
+
+  <div class="important-box">
+    <span class="label">CLIの主要オプション（試験出題範囲）</span>
+    <table>
+      <tr><th>オプション</th><th>意味</th><th>使用例</th></tr>
+      <tr><td><code>-p "プロンプト"</code></td><td>非対話モードで実行</td><td><code>claude -p "テストを実行して"</code></td></tr>
+      <tr><td><code>--output-format</code></td><td>出力形式の指定</td><td><code>text</code> / <code>json</code> / <code>stream-json</code></td></tr>
+      <tr><td><code>--max-turns</code></td><td>最大ターン数の制限</td><td><code>--max-turns 5</code></td></tr>
+      <tr><td><code>--model</code></td><td>使用モデルの指定</td><td><code>--model claude-sonnet-4-6</code></td></tr>
+      <tr><td><code>--allowed-tools</code></td><td>使用可能ツールの制限</td><td><code>--allowed-tools "Read,Grep"</code></td></tr>
+      <tr><td><code>--mcp-config</code></td><td>MCP設定ファイルの指定</td><td><code>--mcp-config ./mcp.json</code></td></tr>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <span class="label">アンチパターン（やってはいけない設計）</span>
+    <ul>
+      <li><span style="color:#ef4444;font-weight:700;">NG:</span> CI/CDで <code>--max-turns</code> を設定しない → 無限ループで課金が爆発する</li>
+      <li><span style="color:#ef4444;font-weight:700;">NG:</span> 出力形式を <code>text</code> にして後続処理でパースしようとする → <code>json</code> を使うべき</li>
+      <li><span style="color:#ef4444;font-weight:700;">NG:</span> APIキーをワークフローファイルにハードコード → GitHub Secretsを使う</li>
+      <li><span style="color:#22c55e;font-weight:700;">OK:</span> <code>--allowed-tools</code> で最小限のツールだけ許可する（セキュリティ原則）</li>
+    </ul>
+  </div>
+
+  <!-- ======================== -->
+  <!-- D3まとめ -->
+  <!-- ======================== -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #22c55e;padding-bottom:8px;margin-top:50px;">D3 まとめ: 試験対策チェックリスト</h3>
+
+  <div class="success-box">
+    <span class="label">これが答えられれば合格ライン</span>
+    <ul style="line-height:2.2;">
+      <li>CLAUDE.md の3つの階層（グローバル/プロジェクト/フォルダ）と優先順位を説明できる</li>
+      <li><code>.claude/rules/</code> でパス指定ルールを設定できる理由を説明できる</li>
+      <li>カスタムコマンドのYAMLフロントマターの5つのフィールドを知っている</li>
+      <li>スキル（SKILL.md）と通常コマンドの違いを説明できる</li>
+      <li>プランモードをいつ使うべきか/使わなくてよいかの判断ができる</li>
+      <li>フックの <code>PreToolUse</code> と <code>PostToolUse</code> の違いと使い分けがわかる</li>
+      <li><code>claude -p</code> の非対話モードと <code>--output-format</code> の3つの形式を知っている</li>
+      <li>CI/CDで <code>--max-turns</code> を設定すべき理由を説明できる</li>
+    </ul>
   </div>
 </section>
 
