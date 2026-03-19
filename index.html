@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'">
+  <meta name="referrer" content="no-referrer">
+  <title>Claude Certified Architect - Foundations 完全攻略ガイド</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #0a0a1a;
+      color: #e0e0e0;
+      line-height: 1.8;
+    }
+
+    /* ===== ヘッダー ===== */
+    .hero {
+      background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #1a3a5c 100%);
+      padding: 80px 20px;
+      text-align: center;
+      border-bottom: 4px solid #7c3aed;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(124,58,237,0.1) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      z-index: 1;
+    }
+    .hero .subtitle {
+      font-size: 1.3rem;
+      color: #a5b4fc;
+      margin-top: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #dc2626, #ea580c);
+      color: #fff;
+      padding: 8px 24px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-top: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== ナビゲーション ===== */
+    .nav-sticky {
+      position: sticky;
+      top: 0;
+      background: rgba(10,10,26,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #333;
+      padding: 12px 20px;
+      z-index: 100;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .nav-sticky a {
+      color: #a5b4fc;
+      text-decoration: none;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+    .nav-sticky a:hover {
+      background: #7c3aed;
+      color: #fff;
+    }
+
+    /* ===== コンテナ ===== */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ===== セクション ===== */
+    section {
+      padding: 60px 0;
+      border-bottom: 1px solid #1e1e3a;
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 30px;
+      padding-left: 16px;
+      border-left: 5px solid #7c3aed;
+      color: #fff;
+    }
+    h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #a78bfa;
+      margin: 30px 0 15px;
+    }
+
+    /* ===== 重要ボックス ===== */
+    .important-box {
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      border: 2px solid #7c3aed;
+      border-radius: 16px;
+      padding: 30px;
+      margin: 24px 0;
+    }
+    .important-box .label {
+      display: inline-block;
+      background: #7c3aed;
+      color: #fff;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+
+    .warning-box {
+      background: linear-gradient(135deg, #451a03, #78350f);
+      border: 2px solid #f59e0b;
+      border-radius: 16px;
+      padding: 30px;
+      margin: 24px 0;
+    }
+    .warning-box .label {
+      display: inline-block;
+      background: #f59e0b;
+      color: #000;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+
+    .success-box {
+      background: linear-gradient(135deg, #052e16, #14532d);
+      border: 2px solid #22c55e;
+      border-radius: 16px;
+      padding: 30px;
+      margin: 24px 0;
+    }
+    .success-box .label {
+      display: inline-block;
+      background: #22c55e;
+      color: #000;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+
+    /* ===== 大きな強調テキスト ===== */
+    .big-text {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #f59e0b;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .big-red {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #ef4444;
+    }
+    .big-green {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #22c55e;
+    }
+    .highlight {
+      background: linear-gradient(transparent 60%, rgba(124,58,237,0.3) 60%);
+      padding: 0 4px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .highlight-yellow {
+      background: linear-gradient(transparent 60%, rgba(245,158,11,0.3) 60%);
+      padding: 0 4px;
+      font-weight: 700;
+      color: #fbbf24;
+    }
+
+    /* ===== 試験情報テーブル ===== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th {
+      background: #7c3aed;
+      color: #fff;
+      padding: 14px 20px;
+      text-align: left;
+      font-weight: 700;
+    }
+    td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #2d2d4a;
+    }
+    tr:nth-child(even) td {
+      background: rgba(124,58,237,0.05);
+    }
+    tr:hover td {
+      background: rgba(124,58,237,0.1);
+    }
+
+    /* ===== カード ===== */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 24px 0;
+    }
+    .card {
+      background: #1e1e3a;
+      border: 1px solid #333;
+      border-radius: 16px;
+      padding: 24px;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: #7c3aed;
+    }
+    .card .card-num {
+      display: inline-block;
+      background: #7c3aed;
+      color: #fff;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 36px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+    .card h4 {
+      color: #a78bfa;
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+
+    /* ===== 進行バー ===== */
+    .progress-bar {
+      background: #1e1e3a;
+      border-radius: 10px;
+      height: 32px;
+      margin: 8px 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      padding-left: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    /* ===== 画像 ===== */
+    .img-container {
+      margin: 30px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid #333;
+    }
+    .img-container img {
+      width: 100%;
+      display: block;
+    }
+    .img-caption {
+      background: #1e1e3a;
+      padding: 12px;
+      text-align: center;
+      color: #a5b4fc;
+      font-size: 0.9rem;
+    }
+
+    /* ===== タイムライン ===== */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 16px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #7c3aed, #22c55e);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 30px;
+      background: #1e1e3a;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #333;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -32px;
+      top: 24px;
+      width: 14px;
+      height: 14px;
+      background: #7c3aed;
+      border-radius: 50%;
+      border: 3px solid #0a0a1a;
+    }
+    .timeline-item .week {
+      display: inline-block;
+      background: #7c3aed;
+      color: #fff;
+      padding: 2px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    /* ===== 用語解説 ===== */
+    .glossary-item {
+      background: #1e1e3a;
+      border-left: 4px solid #60a5fa;
+      padding: 16px 20px;
+      margin: 12px 0;
+      border-radius: 0 12px 12px 0;
+    }
+    .glossary-item dt {
+      color: #60a5fa;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .glossary-item dd {
+      margin-top: 4px;
+      color: #ccc;
+    }
+
+    /* ===== コードブロック ===== */
+    pre {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      color: #a5f3fc;
+      margin: 16px 0;
+    }
+    code {
+      background: rgba(124,58,237,0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #c4b5fd;
+      font-size: 0.9rem;
+    }
+
+    /* ===== フッター ===== */
+    footer {
+      background: #111;
+      padding: 40px 20px;
+      text-align: center;
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    /* ===== レスポンシブ ===== */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 1.8rem; }
+      h2 { font-size: 1.5rem; }
+      .big-text { font-size: 1.2rem; }
+      .big-red { font-size: 1.4rem; }
+      .card-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== ヘッダー ===== -->
+<header class="hero">
+  <h1>Claude Certified Architect<br>Foundations 完全攻略ガイド</h1>
+  <p class="subtitle">PC初心者からでも合格できる！ステップバイステップ学習ロードマップ</p>
+  <span class="badge">2026年3月 最新版</span>
+</header>
+
+<!-- ===== ナビゲーション ===== -->
+<nav class="nav-sticky">
+  <a href="#exam-info">試験概要</a>
+  <a href="#glossary">用語解説</a>
+  <a href="#roadmap">学習ロードマップ</a>
+  <a href="#domain1">D1:エージェント</a>
+  <a href="#domain2">D2:ツール&MCP</a>
+  <a href="#domain3">D3:Claude Code</a>
+  <a href="#domain4">D4:プロンプト</a>
+  <a href="#domain5">D5:コンテキスト</a>
+  <a href="#tips">合格のコツ</a>
+</nav>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- 試験概要 -->
+<!-- ============================================================ -->
+<section id="exam-info">
+  <h2>試験概要</h2>
+
+  <div class="warning-box">
+    <span class="label">試験料について</span>
+    <p class="big-red">試験料: $99（約15,000円）/ 1回の受験ごと</p>
+    <p style="margin-top:8px;">ただし <span class="highlight-yellow">Claude Partner Network（無料で参加可能）</span> のメンバー企業の従業員は、<span class="highlight-yellow">先着5,000名まで無料</span>で受験できます。</p>
+  </div>
+
+  <table>
+    <tr><th>項目</th><th>詳細</th></tr>
+    <tr><td>試験名</td><td><strong>Claude Certified Architect - Foundations</strong></td></tr>
+    <tr><td>発行元</td><td>Anthropic</td></tr>
+    <tr><td>開始日</td><td>2026年3月12日</td></tr>
+    <tr><td>出題形式</td><td><span class="highlight">60問・シナリオベース・4択（正解1つ）</span></td></tr>
+    <tr><td>合格ライン</td><td><span class="big-green">720点 / 1,000点満点</span>（72%以上）</td></tr>
+    <tr><td>試験方式</td><td>オンラインプロクター（監視付き）</td></tr>
+    <tr><td>シナリオ</td><td>全6シナリオ中、ランダムに4つが出題される</td></tr>
+    <tr><td>受験資格</td><td>Partner Network参加（組織なら無料で参加可能）</td></tr>
+    <tr><td>申込サイト</td><td>anthropic.skilljar.com</td></tr>
+  </table>
+
+  <h3>出題の6つのシナリオ</h3>
+  <div class="card-grid">
+    <div class="card">
+      <span class="card-num">1</span>
+      <h4>カスタマーサポートエージェント</h4>
+      <p>Agent SDKとMCPツールを使ったサポートシステムの設計・実装</p>
+    </div>
+    <div class="card">
+      <span class="card-num">2</span>
+      <h4>Claude Codeでの開発</h4>
+      <p>CLAUDE.md設定、プランモード、カスタムコマンドの活用</p>
+    </div>
+    <div class="card">
+      <span class="card-num">3</span>
+      <h4>マルチエージェント・リサーチ</h4>
+      <p>複数エージェントのオーケストレーションとコンテキスト管理</p>
+    </div>
+    <div class="card">
+      <span class="card-num">4</span>
+      <h4>開発者生産性ツール</h4>
+      <p>組み込みツールとMCPサーバーの統合設計</p>
+    </div>
+    <div class="card">
+      <span class="card-num">5</span>
+      <h4>CI/CD パイプライン</h4>
+      <p>非対話的モードと構造化出力によるCI/CD統合</p>
+    </div>
+    <div class="card">
+      <span class="card-num">6</span>
+      <h4>構造化データ抽出</h4>
+      <p>JSONスキーマ設計と検証ループの実装</p>
+    </div>
+  </div>
+
+  <h3>5つのドメインと配点</h3>
+  <div class="img-container">
+    <img src="images/domains.png" alt="試験ドメインの配点割合" loading="lazy">
+    <div class="img-caption">試験ドメインの配点割合 - 5つの分野から出題</div>
+  </div>
+
+  <div style="margin:20px 0;">
+    <p style="margin-bottom:8px;"><strong>D1: エージェンティック・アーキテクチャ &amp; オーケストレーション</strong></p>
+    <div class="progress-bar"><div class="progress-fill" style="width:27%;background:linear-gradient(90deg,#3b82f6,#1d4ed8);">27%</div></div>
+
+    <p style="margin-bottom:8px;margin-top:16px;"><strong>D2: ツール設計 &amp; MCP統合</strong></p>
+    <div class="progress-bar"><div class="progress-fill" style="width:18%;background:linear-gradient(90deg,#f97316,#ea580c);">18%</div></div>
+
+    <p style="margin-bottom:8px;margin-top:16px;"><strong>D3: Claude Code 設定 &amp; ワークフロー</strong></p>
+    <div class="progress-bar"><div class="progress-fill" style="width:20%;background:linear-gradient(90deg,#a855f7,#7c3aed);">20%</div></div>
+
+    <p style="margin-bottom:8px;margin-top:16px;"><strong>D4: プロンプトエンジニアリング &amp; 構造化出力</strong></p>
+    <div class="progress-bar"><div class="progress-fill" style="width:20%;background:linear-gradient(90deg,#14b8a6,#0d9488);">20%</div></div>
+
+    <p style="margin-bottom:8px;margin-top:16px;"><strong>D5: コンテキスト管理 &amp; 信頼性</strong></p>
+    <div class="progress-bar"><div class="progress-fill" style="width:15%;background:linear-gradient(90deg,#22c55e,#16a34a);">15%</div></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 超初心者向け用語解説 -->
+<!-- ============================================================ -->
+<section id="glossary">
+  <h2>超初心者向け - まずこの用語を理解しよう</h2>
+  <p style="margin-bottom:20px;color:#a5b4fc;">試験範囲に出てくる専門用語を、日常の例え話で解説します。</p>
+
+  <dl>
+    <div class="glossary-item">
+      <dt>API（エーピーアイ）</dt>
+      <dd><strong>レストランの注文窓口</strong>のようなもの。お客さん（あなたのプログラム）がメニュー（API仕様）を見て注文（リクエスト）すると、キッチン（サーバー）が料理（データ）を返してくれます。Claude APIは「Claudeに質問を送って回答をもらう窓口」です。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>エージェント（Agent）</dt>
+      <dd><strong>自分で考えて行動する秘書</strong>のようなもの。普通のチャットボットは「聞かれたことに答えるだけ」ですが、エージェントは「ファイルを読む」「検索する」「コードを実行する」など、<span class="highlight">自分でツールを使って仕事を完了</span>してくれます。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>MCP（Model Context Protocol）</dt>
+      <dd><strong>USBポート</strong>のようなもの。USBポートがあれば、マウスもキーボードもプリンターも繋げますよね。MCPはClaude AIに「データベース」「ファイル」「Webサービス」などを<span class="highlight">統一規格で繋げる仕組み</span>です。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>プロンプトエンジニアリング</dt>
+      <dd><strong>AIへの「上手な指示の出し方」</strong>。同じ質問でも、聞き方を工夫するとAIの回答品質が劇的に変わります。料理を注文するとき「美味しいもの」と言うより「辛さ控えめの鶏肉料理、ご飯付き」と言うほうが希望通りのものが来るのと同じです。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>JSONスキーマ</dt>
+      <dd><strong>注文用紙のフォーマット</strong>。「名前はここ」「住所はここ」「電話番号はここ」と<span class="highlight">データの形を事前に決めておく仕組み</span>。AIに「この形式で答えてね」と伝えることで、プログラムが処理しやすい回答を得られます。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>コンテキストウィンドウ</dt>
+      <dd><strong>AIの「短期記憶」</strong>の大きさ。会話が長くなると古い内容を忘れてしまいます。このメモリの容量がコンテキストウィンドウで、Claudeは最大200Kトークン（本数冊分）まで覚えられます。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>CLAUDE.md</dt>
+      <dd><strong>Claudeへの「取扱説明書」</strong>。プロジェクトのルート（一番上のフォルダ）に置くファイルで、「このプロジェクトではTypeScriptを使って」「テストは必ずJestで」などの指示を書いておくと、Claude Codeが毎回それに従って動きます。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>オーケストレーション</dt>
+      <dd><strong>指揮者</strong>のようなもの。複数のエージェントを「あなたはリサーチ担当」「あなたはコーディング担当」と役割分担させて、全体をまとめ上げること。一人でやるより効率的に大きな仕事をこなせます。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>SDK（Software Development Kit）</dt>
+      <dd><strong>工具セット</strong>のようなもの。家具を組み立てるのに必要な工具（ドライバー、レンチ等）がまとめて入っている箱。Agent SDKは「エージェントを作るために必要なコードやツールが全部入ったパッケージ」です。</dd>
+    </div>
+    <div class="glossary-item">
+      <dt>CI/CD</dt>
+      <dd><strong>自動出版システム</strong>。原稿（コード）を書いたら、自動で校正（テスト）して、自動で印刷・配本（デプロイ）してくれる仕組み。Continuous Integration / Continuous Deliveryの略。</dd>
+    </div>
+  </dl>
+</section>
+
+<!-- ============================================================ -->
+<!-- 学習ロードマップ -->
+<!-- ============================================================ -->
+<section id="roadmap">
+  <h2>PC初心者からの12週間ロードマップ</h2>
+
+  <div class="img-container">
+    <img src="images/roadmap.png" alt="5段階学習ロードマップ" loading="lazy">
+    <div class="img-caption">初心者から試験合格までの5ステップ学習階段</div>
+  </div>
+
+  <div class="important-box">
+    <span class="label">学習期間の目安</span>
+    <p><span class="big-green">AI開発経験者: 2〜4週間</span></p>
+    <p><span class="big-text">プログラミング経験者: 4〜8週間</span></p>
+    <p><span class="big-red">PC初心者: 12〜16週間</span></p>
+    <p style="margin-top:12px;">以下は<strong>PC初心者向けの16週間プラン</strong>です。経験者は該当するステップから開始してください。</p>
+  </div>
+
+  <div class="timeline">
+    <!-- Phase 0 -->
+    <div class="timeline-item">
+      <span class="week">Week 1-2 | 準備フェーズ</span>
+      <h4 style="color:#60a5fa;">Step 0: PCの基礎を固める</h4>
+      <p><strong>目標:</strong> コマンドライン（ターミナル）を怖がらずに使えるようになる</p>
+      <ul style="margin-top:8px;">
+        <li>Windows / Mac の基本操作を確認</li>
+        <li><span class="highlight">ターミナル（コマンドプロンプト）</span>の基本: <code>cd</code>, <code>ls</code>, <code>mkdir</code></li>
+        <li>テキストエディタ（VS Code）のインストールと基本操作</li>
+        <li>Git / GitHub の基礎（アカウント作成、clone, commit, push）</li>
+      </ul>
+      <p style="margin-top:8px;color:#a5b4fc;">無料教材: Progate, ドットインストール, YouTube</p>
+    </div>
+
+    <!-- Phase 1 -->
+    <div class="timeline-item">
+      <span class="week">Week 3-5 | Python & API基礎</span>
+      <h4 style="color:#60a5fa;">Step 1: PythonとAPIの基礎</h4>
+      <p><strong>目標:</strong> Pythonで簡単なプログラムを書き、APIを呼べるようになる</p>
+      <ul style="margin-top:8px;">
+        <li>Python基礎: 変数、条件分岐、ループ、関数、辞書、リスト</li>
+        <li>pip（パッケージ管理）の使い方</li>
+        <li><span class="highlight">JSON（ジェイソン）</span>の読み書き -- データのやりとりの基本形式</li>
+        <li>REST APIの基礎: <code>requests</code> ライブラリでHTTPリクエスト</li>
+        <li><span class="highlight-yellow">実践: 天気APIを叩いて結果を表示するプログラムを作る</span></li>
+      </ul>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="timeline-item">
+      <span class="week">Week 6-8 | Claude AI基礎</span>
+      <h4 style="color:#60a5fa;">Step 2: Claude AIを理解する</h4>
+      <p><strong>目標:</strong> Claude APIを使ってプログラムからClaudeを呼び出せるようになる</p>
+      <ul style="margin-top:8px;">
+        <li>LLM（大規模言語モデル）とは何か理解する</li>
+        <li>Claude のモデル種類: Haiku（安い・速い）/ Sonnet（バランス）/ Opus（高性能）</li>
+        <li><span class="highlight">Anthropic Python SDKのインストール</span></li>
+        <li>APIキーの取得と管理（.envファイルで安全に管理）</li>
+        <li>基本的なAPI呼び出し: <code>messages.create()</code></li>
+        <li>コンテキストウィンドウとトークンの概念</li>
+        <li><span class="highlight-yellow">実践: Claudeに質問して答えをもらうチャットボットを作る</span></li>
+      </ul>
+      <pre>
+# 最小限のClaude API呼び出し例
+import anthropic
+
+client = anthropic.Anthropic()  # APIキーは環境変数から自動読込
+
+message = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Pythonとは何ですか？"}
+    ]
+)
+print(message.content[0].text)
+      </pre>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="timeline-item">
+      <span class="week">Week 9-10 | Claude Code & プロンプト</span>
+      <h4 style="color:#60a5fa;">Step 3: Claude Code とプロンプトエンジニアリング</h4>
+      <p><strong>目標:</strong> Claude Codeを使いこなし、効果的なプロンプトを書ける</p>
+      <ul style="margin-top:8px;">
+        <li><span class="highlight">Claude Code のインストールと基本操作</span></li>
+        <li>CLAUDE.md の階層構造（グローバル / プロジェクト / フォルダ）</li>
+        <li>カスタムスラッシュコマンドの作成</li>
+        <li>プランモード: 実行前に計画を立てさせる</li>
+        <li>プロンプトエンジニアリング基礎:
+          <ul>
+            <li>明示的な基準の設定</li>
+            <li><span class="highlight">Few-shot（少数例）プロンプティング</span> -- 例を見せて学ばせる</li>
+            <li>構造化出力: <code>tool_use</code> による JSON出力の強制</li>
+          </ul>
+        </li>
+        <li>JSONスキーマの設計</li>
+        <li><span class="highlight-yellow">実践: CLAUDE.md を作成してプロジェクトを Claude Code で管理</span></li>
+      </ul>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="timeline-item">
+      <span class="week">Week 11-13 | エージェント & MCP</span>
+      <h4 style="color:#60a5fa;">Step 4: エージェント・アーキテクチャ &amp; MCP</h4>
+      <p><strong>目標:</strong> エージェントシステムを設計でき、MCPを使えるようになる</p>
+      <ul style="margin-top:8px;">
+        <li><span class="highlight">Agent SDK の使い方</span> -- エージェントの作り方</li>
+        <li>エージェンティック・ループ: 「考える→道具を使う→結果を確認→繰り返す」</li>
+        <li>ツール設計のベストプラクティス:
+          <ul>
+            <li>ツール名と説明を明確に書く</li>
+            <li>エラーハンドリングを構造化する</li>
+          </ul>
+        </li>
+        <li><span class="highlight">MCP（Model Context Protocol）</span>の設定と使い方</li>
+        <li>マルチエージェント・オーケストレーション</li>
+        <li>検証ループと再試行ループの実装</li>
+        <li>エスカレーションパターン（AIが判断できない時に人間に聞く仕組み）</li>
+        <li><span class="highlight-yellow">実践: MCPサーバーを作成し、エージェントからDBを操作する</span></li>
+      </ul>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="timeline-item">
+      <span class="week">Week 14-16 | 試験対策</span>
+      <h4 style="color:#22c55e;">Step 5: 模擬試験と仕上げ</h4>
+      <p><strong>目標:</strong> 合格ラインの720点/1000点を超える</p>
+      <ul style="margin-top:8px;">
+        <li>公式試験ガイドを熟読する</li>
+        <li>6つのシナリオそれぞれで設計問題を解く</li>
+        <li><span class="highlight">アンチパターン（やってはいけない設計）</span>を覚える</li>
+        <li>模擬問題で繰り返し練習</li>
+        <li>弱点分野を特定して重点復習</li>
+        <li><span class="highlight-yellow">最終チェック: 全ドメインで7割以上取れるか確認</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ドメイン1 -->
+<!-- ============================================================ -->
+<section id="domain1">
+  <h2>D1: エージェンティック・アーキテクチャ（27%）</h2>
+  <p class="big-text">最も配点が高い！ここを落とすと合格できない</p>
+
+  <div class="img-container">
+    <img src="images/agent-flow.png" alt="エージェント・アーキテクチャのフロー" loading="lazy">
+    <div class="img-caption">エージェントの基本フロー: ユーザーリクエスト → エージェントループ → ツール実行 → レスポンス</div>
+  </div>
+
+  <h3>超初心者向け解説: エージェントとは？</h3>
+  <div class="important-box">
+    <span class="label">日常の例で理解する</span>
+    <p>普通のチャットAI = <strong>質問に答えるだけの受付係</strong></p>
+    <p>エージェント = <strong>自分で電話して、書類を調べて、報告書を作ってくれる秘書</strong></p>
+    <p style="margin-top:12px;">エージェントの動き方（<span class="highlight">エージェンティック・ループ</span>）:</p>
+    <ol style="margin-top:8px;">
+      <li><strong>考える</strong>: 「この質問に答えるには何が必要かな？」</li>
+      <li><strong>道具を選ぶ</strong>: 「データベースを検索しよう」</li>
+      <li><strong>道具を使う</strong>: データベースに問い合わせる</li>
+      <li><strong>結果を確認</strong>: 「十分な情報が集まったかな？」</li>
+      <li><strong>繰り返す or 回答</strong>: 足りなければ1に戻る、十分なら回答する</li>
+    </ol>
+  </div>
+
+  <h3>出題されるトピック</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>Agent SDK</h4>
+      <p>Anthropicが提供するエージェント開発キット。エージェントの作成・実行・管理ができる。</p>
+    </div>
+    <div class="card">
+      <h4>マルチエージェント</h4>
+      <p>複数のエージェントを連携させる設計。「調査エージェント」「執筆エージェント」など役割分担。</p>
+    </div>
+    <div class="card">
+      <h4>フック（Hooks）</h4>
+      <p>エージェントの動作の前後に独自の処理を挟む仕組み。「ツール実行前にログを残す」など。</p>
+    </div>
+    <div class="card">
+      <h4>タスク分解</h4>
+      <p>大きな仕事を小さなステップに分割するパターン。複雑な問題を解きやすくする。</p>
+    </div>
+  </div>
+
+  <h3>コード例: 基本的なエージェント</h3>
+  <pre>
+import anthropic
+
+# エージェントのツールを定義
+tools = [
+    {
+        "name": "search_database",
+        "description": "商品データベースを検索する",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "検索キーワード"
+                }
+            },
+            "required": ["query"]
+        }
+    }
+]
+
+# エージェンティック・ループ
+client = anthropic.Anthropic()
+messages = [{"role": "user", "content": "赤いスニーカーを探して"}]
+
+while True:
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1024,
+        tools=tools,
+        messages=messages
+    )
+
+    # ツール使用が必要なら実行して結果を返す
+    if response.stop_reason == "tool_use":
+        # ツールを実行して結果をmessagesに追加
+        # ... ループ継続
+        pass
+    else:
+        # 最終回答 → ループ終了
+        print(response.content[0].text)
+        break
+  </pre>
+</section>
+
+<!-- ============================================================ -->
+<!-- ドメイン2 -->
+<!-- ============================================================ -->
+<section id="domain2">
+  <h2>D2: ツール設計 &amp; MCP統合（18%）</h2>
+
+  <h3>超初心者向け解説: MCPとは？</h3>
+  <div class="important-box">
+    <span class="label">日常の例で理解する</span>
+    <p>スマートフォンを考えてみてください:</p>
+    <ul style="margin-top:8px;">
+      <li><strong>スマホ本体</strong> = Claude AI</li>
+      <li><strong>アプリ</strong> = MCP サーバー（データベース、メール、カレンダーなど）</li>
+      <li><strong>App Store</strong> = MCPの統一規格（どんなアプリも同じルールで動く）</li>
+    </ul>
+    <p style="margin-top:12px;">MCPがあることで、Claude は<span class="highlight">いろんな外部サービスに統一的な方法で接続</span>できます。</p>
+  </div>
+
+  <h3>出題されるトピック</h3>
+  <ul>
+    <li><strong>ツール説明のベストプラクティス</strong>: ツール名と説明を明確に書く（AIはこれを読んでツールを選ぶ）</li>
+    <li><strong>構造化エラー対応</strong>: ツールがエラーを返す場合のハンドリング</li>
+    <li><strong>MCP設定</strong>: <code>claude_desktop_config.json</code> でサーバーを接続</li>
+    <li><strong>Claudeの組み込みツール</strong>: Read, Write, Edit, Bash, Glob, Grep</li>
+    <li><strong>ツールの粒度設計</strong>: 1つのツールに機能を詰め込みすぎない</li>
+  </ul>
+
+  <div class="warning-box">
+    <span class="label">よくある間違い（アンチパターン）</span>
+    <ul>
+      <li>ツールの説明が曖昧 → AIが適切なツールを選べない</li>
+      <li>1つのツールに複数の機能 → 使い分けが困難に</li>
+      <li>エラー時の処理がない → エージェントが止まってしまう</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ドメイン3 -->
+<!-- ============================================================ -->
+<section id="domain3">
+  <h2>D3: Claude Code 設定 &amp; ワークフロー（20%）</h2>
+
+  <h3>超初心者向け解説: Claude Codeとは？</h3>
+  <div class="important-box">
+    <span class="label">日常の例で理解する</span>
+    <p><strong>Claude Code</strong> = あなたのPCの中で動く<span class="highlight">AIプログラマー助手</span></p>
+    <p>ターミナルで <code>claude</code> と打つだけで起動。ファイルの読み書き、コード修正、テスト実行、Git操作まで全部やってくれます。</p>
+  </div>
+
+  <h3>CLAUDE.md の階層構造（超重要！）</h3>
+  <pre>
+# CLAUDE.md は3つのレベルで設定できる
+
+~/.claude/CLAUDE.md          # グローバル（全プロジェクト共通）
+プロジェクト/CLAUDE.md       # プロジェクト単位
+プロジェクト/src/CLAUDE.md   # フォルダ単位（そのフォルダの作業時のみ有効）
+
+# 優先順位: フォルダ > プロジェクト > グローバル
+  </pre>
+
+  <h3>出題されるトピック</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>CLAUDE.md 設定</h4>
+      <p>プロジェクトルール、コーディング規約、使用技術の指定。階層構造の理解が必須。</p>
+    </div>
+    <div class="card">
+      <h4>カスタムコマンド</h4>
+      <p><code>.claude/commands/</code>にMDファイルを置いて独自の<code>/コマンド</code>を作成。</p>
+    </div>
+    <div class="card">
+      <h4>プランモード</h4>
+      <p>Claude に「まず計画を立ててから実行」させるモード。大規模変更時に必須。</p>
+    </div>
+    <div class="card">
+      <h4>CI/CD統合</h4>
+      <p><code>claude -p "指示" --output-format json</code> で非対話的にClaudeを利用。自動化パイプラインに組み込む。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ドメイン4 -->
+<!-- ============================================================ -->
+<section id="domain4">
+  <h2>D4: プロンプトエンジニアリング &amp; 構造化出力（20%）</h2>
+
+  <h3>超初心者向け解説</h3>
+  <div class="important-box">
+    <span class="label">AIへの指示の出し方で結果が激変する</span>
+    <p><strong>悪い例:</strong> 「ユーザー情報を整理して」</p>
+    <p><strong>良い例:</strong> 「以下のユーザー情報を、name, email, age のJSONオブジェクトとして出力してください。ageが不明な場合はnullにしてください。」</p>
+    <p style="margin-top:12px;">この<span class="highlight">「良い指示の出し方」を体系的に学ぶ</span>のがプロンプトエンジニアリングです。</p>
+  </div>
+
+  <h3>試験で問われるテクニック</h3>
+
+  <h4 style="color:#14b8a6;margin-top:20px;">1. 明示的な基準の設定</h4>
+  <p>「良い」「悪い」の判断基準をプロンプトに含める。AIに「何が正解か」を教える。</p>
+
+  <h4 style="color:#14b8a6;margin-top:20px;">2. Few-shot（少数例）プロンプティング</h4>
+  <p>「こういう入力が来たら、こう返してね」という例を2-3個見せる手法。</p>
+  <pre>
+# Few-shotプロンプティングの例
+prompt = """
+以下の形式でレビューの感情を分類してください。
+
+入力: "この商品は最高です！"
+出力: {"sentiment": "positive", "confidence": 0.95}
+
+入力: "まあまあかな"
+出力: {"sentiment": "neutral", "confidence": 0.6}
+
+入力: "二度と買わない"
+出力: {"sentiment": "negative", "confidence": 0.9}
+
+入力: "値段の割には良い品質"
+出力:
+"""
+  </pre>
+
+  <h4 style="color:#14b8a6;margin-top:20px;">3. tool_use による構造化出力の強制</h4>
+  <p>AIに「このJSONスキーマの形で答えてね」と強制する方法。自由文ではなく、プログラムが処理できる形式で出力させる。</p>
+
+  <h4 style="color:#14b8a6;margin-top:20px;">4. 検証ループと再試行ループ</h4>
+  <div class="success-box">
+    <span class="label">超重要パターン</span>
+    <p>AIの出力を<span class="highlight">プログラムで検証</span>して、ダメだったら<span class="highlight">やり直させる</span>仕組み。</p>
+    <ol style="margin-top:8px;">
+      <li>AIに出力させる</li>
+      <li>JSONとして正しいか検証</li>
+      <li>必須フィールドがあるか検証</li>
+      <li>不正なら「ここが間違っています。修正してください」と再度AIに投げる</li>
+      <li>最大3回まで再試行</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ドメイン5 -->
+<!-- ============================================================ -->
+<section id="domain5">
+  <h2>D5: コンテキスト管理 &amp; 信頼性（15%）</h2>
+
+  <h3>超初心者向け解説</h3>
+  <div class="important-box">
+    <span class="label">AIの「記憶力」をどう管理するか</span>
+    <p>AIとの会話が長くなると、最初の方の内容を忘れてしまいます。</p>
+    <p>これは<span class="highlight">コンテキストウィンドウ</span>（AIの短期記憶）に限りがあるため。</p>
+    <p style="margin-top:8px;">この問題にどう対処するかが「コンテキスト管理」です。</p>
+  </div>
+
+  <h3>出題されるトピック</h3>
+
+  <h4 style="color:#22c55e;margin-top:20px;">1. 段階的要約のリスク</h4>
+  <p>長い会話を「要約」して圧縮する手法。ただし要約の過程で<span class="highlight-yellow">重要な情報が抜け落ちるリスク</span>がある。</p>
+
+  <h4 style="color:#22c55e;margin-top:20px;">2. コンテキスト配置</h4>
+  <p>重要な情報を会話のどこに置くかで、AIの精度が変わる。<span class="highlight">最初と最後</span>に重要情報を置くのが効果的。</p>
+
+  <h4 style="color:#22c55e;margin-top:20px;">3. エスカレーションパターン</h4>
+  <div class="success-box">
+    <span class="label">試験頻出</span>
+    <p>AIが<strong>「自分には判断できない」</strong>と認識したとき、<span class="highlight">人間に判断を委ねる</span>仕組み。</p>
+    <p>例: 返金額が$100を超える場合 → マネージャーに転送</p>
+  </div>
+
+  <h4 style="color:#22c55e;margin-top:20px;">4. マルチエージェントのエラー伝播</h4>
+  <p>エージェントAがエラーを出したとき、エージェントBにどう伝えるか。エラーが連鎖して全体が止まらないようにする設計。</p>
+
+  <h4 style="color:#22c55e;margin-top:20px;">5. 信頼度較正（キャリブレーション）</h4>
+  <p>AIの「確信度」を数値化して、<span class="highlight-yellow">確信度が低い回答は人間に確認する</span>仕組み。「90%確信あり」vs「30%確信あり」で対応を変える。</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- 合格のコツ -->
+<!-- ============================================================ -->
+<section id="tips">
+  <h2>合格のコツ</h2>
+
+  <div class="success-box">
+    <span class="label">最重要アドバイス</span>
+    <p class="big-green">「暗記」ではなく「設計判断力」が問われる試験です</p>
+    <p style="margin-top:8px;">すべての問題はシナリオベース。「この状況で最適な設計は何か？」を判断する力が必要です。</p>
+  </div>
+
+  <div class="card-grid">
+    <div class="card" style="border-color:#22c55e;">
+      <h4 style="color:#22c55e;">1. 公式ドキュメントを読む</h4>
+      <p>Anthropicの公式ドキュメント（docs.anthropic.com）が最も重要な教材です。特にAgent SDK、MCP、Claude Codeのセクション。</p>
+    </div>
+    <div class="card" style="border-color:#22c55e;">
+      <h4 style="color:#22c55e;">2. 手を動かす</h4>
+      <p>読むだけでは不十分。実際にエージェントを作り、MCPサーバーを構築し、CLAUDE.mdを設定する経験が必要。</p>
+    </div>
+    <div class="card" style="border-color:#22c55e;">
+      <h4 style="color:#22c55e;">3. アンチパターンを覚える</h4>
+      <p>「何をすべきか」だけでなく「何をしてはいけないか」も出題される。18個のアンチパターンを把握する。</p>
+    </div>
+    <div class="card" style="border-color:#22c55e;">
+      <h4 style="color:#22c55e;">4. トレードオフを考える</h4>
+      <p>「レイテンシ vs コスト」「安全性 vs スピード」など、正解が1つではない設計判断の練習をする。</p>
+    </div>
+  </div>
+
+  <h3>推奨学習リソース</h3>
+  <table>
+    <tr><th>リソース</th><th>内容</th><th>料金</th></tr>
+    <tr><td>Anthropic 公式ドキュメント</td><td>API、Agent SDK、MCP、Claude Code の公式リファレンス</td><td>無料</td></tr>
+    <tr><td>Claude Certifications サイト</td><td>試験ガイド、模擬問題、アンチパターン集</td><td>無料</td></tr>
+    <tr><td>Anthropic Cookbook (GitHub)</td><td>実践的なコード例とパターン集</td><td>無料</td></tr>
+    <tr><td>Claude Code 実践</td><td>実際にClaude Codeを使ってプロジェクトを管理する</td><td>API使用料のみ</td></tr>
+  </table>
+
+  <div class="warning-box">
+    <span class="label">注意事項</span>
+    <ul>
+      <li>試験は<strong>英語</strong>で出題されます（日本語対応は未定）</li>
+      <li>不合格でも再受験可能ですが、<span class="highlight-yellow">毎回$99かかります</span>（Partner特典利用を推奨）</li>
+      <li>オンラインプロクター試験のため、安定したネット環境とWebカメラが必要</li>
+      <li>試験中のメモ・教材の参照は禁止</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Claude Certified Architect - Foundations 完全攻略ガイド</p>
+  <p>最終更新: 2026年3月19日 | このガイドはAnthropic公式ではありません</p>
+  <p style="margin-top:8px;">Sources: claudecertifications.com, docs.anthropic.com, lowcode.agency</p>
+</footer>
+
+</body>
+</html>
