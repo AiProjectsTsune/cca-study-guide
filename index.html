@@ -1314,20 +1314,409 @@ prompt = """
 """
   </pre>
 
-  <h4 style="color:#14b8a6;margin-top:20px;">3. tool_use による構造化出力の強制</h4>
-  <p>AIに「このJSONスキーマの形で答えてね」と強制する方法。自由文ではなく、プログラムが処理できる形式で出力させる。</p>
+  <!-- ======================================== -->
+  <!-- トピック3: 構造化出力（大幅拡充） -->
+  <!-- ======================================== -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #14b8a6;padding-bottom:8px;margin-top:50px;">トピック3: tool_use による構造化出力の強制</h3>
 
-  <h4 style="color:#14b8a6;margin-top:20px;">4. 検証ループと再試行ループ</h4>
   <div class="success-box">
-    <span class="label">超重要パターン</span>
-    <p>AIの出力を<span class="highlight">プログラムで検証</span>して、ダメだったら<span class="highlight">やり直させる</span>仕組み。</p>
-    <ol style="margin-top:8px;">
-      <li>AIに出力させる</li>
-      <li>JSONとして正しいか検証</li>
-      <li>必須フィールドがあるか検証</li>
-      <li>不正なら「ここが間違っています。修正してください」と再度AIに投げる</li>
-      <li>最大3回まで再試行</li>
-    </ol>
+    <span class="label">一言でいうと</span>
+    <p><span class="big-green">AIに「この形で答えて」と"強制"する仕組み</span></p>
+    <p>普通にAIに聞くと自由な文章で返ってきますが、プログラムで処理するには<span class="highlight">決まった形式のデータ</span>が必要です。構造化出力はそれを保証します。</p>
+  </div>
+
+  <h4 style="color:#14b8a6;">日常の例で理解する</h4>
+  <div class="important-box">
+    <span class="label">構造化出力 = 注文用紙への記入</span>
+    <p><strong>構造化出力なし:</strong> 「鈴木さんがメールでエンタープライズプランに興味があると言ってました」 → <span style="color:#ef4444;">プログラムで処理しにくい</span></p>
+    <p style="margin-top:8px;"><strong>構造化出力あり:</strong></p>
+    <pre style="margin:8px 0;">
+{
+  "name": "鈴木太郎",
+  "email": "suzuki@example.com",
+  "plan_interest": "enterprise",
+  "demo_requested": true
+}
+    </pre>
+    <p>→ <span style="color:#22c55e;">プログラムがすぐにデータベースに保存できる！</span></p>
+  </div>
+
+  <h4 style="color:#14b8a6;">公式の2つの方法（試験必出）</h4>
+  <p>Anthropic公式ドキュメントでは、構造化出力を実現する<span class="highlight">2つの方法</span>が提供されています。</p>
+
+  <table>
+    <tr><th>方法</th><th>仕組み</th><th>保証レベル</th><th>用途</th></tr>
+    <tr>
+      <td><span style="color:#14b8a6;font-weight:700;">JSON出力<br>(output_config)</span></td>
+      <td>レスポンス全体をJSONスキーマに従わせる</td>
+      <td><span class="big-green" style="font-size:1rem;">スキーマ準拠を保証</span></td>
+      <td>データ抽出、レポート生成、分類</td>
+    </tr>
+    <tr>
+      <td><span style="color:#f59e0b;font-weight:700;">Strict Tool Use<br>(strict: true)</span></td>
+      <td>ツール呼び出しの引数をスキーマに従わせる</td>
+      <td><span class="big-green" style="font-size:1rem;">型安全を保証</span></td>
+      <td>エージェントのツール呼び出し、関数実行</td>
+    </tr>
+  </table>
+
+  <h4 style="color:#14b8a6;margin-top:30px;">方法1: JSON出力（output_config.format）</h4>
+  <p>AIの回答全体を指定したJSONスキーマの形に強制します。</p>
+
+  <pre>
+# Python（Pydanticモデルを使う方法 - 公式推奨）
+from pydantic import BaseModel
+from anthropic import Anthropic
+
+# ステップ1: 「注文用紙」の型を定義する
+class ContactInfo(BaseModel):
+    name: str               # 名前（文字列）
+    email: str              # メール（文字列）
+    plan_interest: str      # 興味のあるプラン（文字列）
+    demo_requested: bool    # デモ希望かどうか（true/false）
+
+client = Anthropic()
+
+# ステップ2: output_format にPydanticモデルを渡す
+response = client.messages.parse(
+    model="claude-sonnet-4-6",
+    max_tokens=1024,
+    messages=[{
+        "role": "user",
+        "content": "抽出して: 鈴木太郎 (suzuki@example.com) "
+                   "エンタープライズプランに興味あり、火曜14時にデモ希望"
+    }],
+    output_format=ContactInfo   # ← ここで型を指定！
+)
+
+# ステップ3: 自動でバリデーション済みのデータが得られる
+print(response.parsed_output)
+# → ContactInfo(name='鈴木太郎', email='suzuki@example.com',
+#               plan_interest='enterprise', demo_requested=True)
+  </pre>
+
+  <div class="important-box">
+    <span class="label">SDK別の書き方（試験に出る可能性あり）</span>
+    <table>
+      <tr><th>言語</th><th>メソッド</th><th>スキーマ定義方法</th></tr>
+      <tr><td>Python</td><td><code>client.messages.parse()</code></td><td>Pydantic <code>BaseModel</code></td></tr>
+      <tr><td>TypeScript</td><td><code>client.messages.parse()</code></td><td>Zod スキーマ + <code>zodOutputFormat()</code></td></tr>
+      <tr><td>cURL / その他</td><td>output_config パラメータ</td><td>生の JSON Schema</td></tr>
+    </table>
+  </div>
+
+  <h4 style="color:#14b8a6;margin-top:30px;">方法2: Strict Tool Use（strict: true）</h4>
+  <p>ツール呼び出しの引数がスキーマに100%準拠することを<span class="highlight">保証</span>します。</p>
+
+  <pre>
+# エージェントのツールに strict: True を設定
+response = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "東京の天気を教えて"}],
+    tools=[{
+        "name": "get_weather",
+        "description": "指定した都市の現在の天気を取得する",
+        "strict": True,     # ← これが重要！スキーマ準拠を保証
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "都市名（例: 東京）"
+                },
+                "unit": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"]  # この2つしか選べない
+                }
+            },
+            "required": ["location"],       # location は必須
+            "additionalProperties": False   # 余計なフィールドを禁止
+        }
+    }]
+)
+
+# strict: True の保証:
+# ✅ JSONが壊れることはない
+# ✅ required フィールドが必ず存在する
+# ✅ 型が正しい（stringにnumberが入らない）
+# ✅ enum以外の値が入らない
+# ✅ 再試行ループが不要になる！
+  </pre>
+
+  <div class="warning-box">
+    <span class="label">試験で問われる JSON Schema の制約（公式ドキュメント）</span>
+    <p><strong>使えるキーワード:</strong></p>
+    <ul>
+      <li><code>type</code>, <code>properties</code>, <code>required</code>, <code>additionalProperties</code></li>
+      <li><code>enum</code>（選択肢を限定）, <code>const</code>（固定値）</li>
+      <li><code>items</code>（配列の要素定義）, <code>description</code></li>
+    </ul>
+    <p style="margin-top:12px;"><strong><span style="color:#ef4444;">使えないキーワード（要注意！）:</span></strong></p>
+    <ul>
+      <li><code>minimum</code>, <code>maximum</code>（数値の最小/最大） → descriptionに記述で代用</li>
+      <li><code>minLength</code>, <code>maxLength</code>（文字列長） → descriptionに記述で代用</li>
+      <li><code>pattern</code>（正規表現） → 非対応</li>
+    </ul>
+    <p style="margin-top:8px;color:#f59e0b;">SDKが自動でこれらの制約を description に変換してくれます。</p>
+  </div>
+
+  <h4 style="color:#14b8a6;margin-top:30px;">Claude Code CLI での構造化出力</h4>
+  <p>Claude Code の CLI でも <code>--json-schema</code> フラグで構造化出力が使えます。</p>
+  <pre>
+# CLIで構造化出力を取得
+claude -p "auth.py の関数名を抽出して" \
+  --output-format json \
+  --json-schema '{
+    "type": "object",
+    "properties": {
+      "functions": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "required": ["functions"]
+  }'
+
+# 結果例:
+# {"functions": ["login", "verify_token", "logout", "refresh_session"]}
+  </pre>
+
+  <h4 style="color:#14b8a6;margin-top:30px;">ベストプラクティス（公式推奨）</h4>
+  <div class="card-grid">
+    <div class="card" style="border-color:#14b8a6;">
+      <h4 style="color:#22c55e;">DO（やるべき）</h4>
+      <ul>
+        <li>Pydantic / Zod でスキーマ定義（生JSONより安全）</li>
+        <li><code>additionalProperties: false</code> を必ず設定</li>
+        <li>description を各フィールドに付ける</li>
+        <li>選択肢は <code>enum</code> で制限する</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:#ef4444;">
+      <h4 style="color:#ef4444;">DON'T（やってはいけない）</h4>
+      <ul>
+        <li>プロンプトだけでJSON出力を「お願い」する（保証されない）</li>
+        <li><code>minimum/maximum</code> をスキーマに入れる（無視される）</li>
+        <li>巨大すぎるスキーマを定義する（性能低下）</li>
+        <li><code>strict: true</code> なのに再試行ループを書く（無駄）</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ======================================== -->
+  <!-- トピック4: 検証ループと再試行ループ -->
+  <!-- ======================================== -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #14b8a6;padding-bottom:8px;margin-top:50px;">トピック4: 検証ループと再試行ループ</h3>
+
+  <div class="success-box">
+    <span class="label">一言でいうと</span>
+    <p><span class="big-green">AIの回答を「検品」して、不良品なら「やり直し」させる品質管理システム</span></p>
+    <p>工場の品質管理で例えると: 製品を検査して、不良品があれば製造ラインに戻してやり直させる。それと全く同じです。</p>
+  </div>
+
+  <div class="warning-box">
+    <span class="label">重要: structured outputs との関係</span>
+    <p>公式ドキュメントでは、<span class="highlight-yellow">structured outputs（strict: true）を使えば検証ループは不要</span>になると明記されています。</p>
+    <p style="margin-top:8px;">検証ループが必要なのは:</p>
+    <ul>
+      <li>strict: true を使わない場合</li>
+      <li>スキーマの制約（minimum/maximum等）を自分で検証する場合</li>
+      <li>ビジネスロジック上の妥当性を検証する場合（例: 日付が未来であるか）</li>
+    </ul>
+  </div>
+
+  <h4 style="color:#14b8a6;">検証ループの全体フロー</h4>
+  <div class="important-box">
+    <span class="label">フロー図（日常の例え付き）</span>
+    <pre style="background:transparent;border:none;color:#e0e0e0;padding:0;">
+┌──────────────────────────────────────────┐
+│  1. AIにリクエストを送る                    │ ← 「この注文を処理して」
+│     (プロンプト + スキーマ指定)              │
+└─────────────┬────────────────────────────┘
+              ▼
+┌──────────────────────────────────────────┐
+│  2. AIがレスポンスを返す                    │ ← 料理が出てくる
+│     (JSON形式のデータ)                      │
+└─────────────┬────────────────────────────┘
+              ▼
+┌──────────────────────────────────────────┐
+│  3. 検証（バリデーション）                   │ ← 品質検査
+│     ├── JSONとして正しいか？                │
+│     ├── 必須フィールドがあるか？             │
+│     ├── データ型は正しいか？                │
+│     └── ビジネスルールを満たすか？           │
+└─────┬───────────────┬────────────────────┘
+      │ ✅ 合格        │ ❌ 不合格
+      ▼               ▼
+┌──────────┐  ┌───────────────────────────┐
+│ 結果を返す │  │ 4. エラー内容をフィードバック  │
+│ （完了）   │  │    して再度リクエスト          │
+└──────────┘  │    （最大N回まで）              │
+              └──────────┬────────────────┘
+                         │ 再試行 (→ ステップ2に戻る)
+                         ▼
+              ┌───────────────────────────┐
+              │ 5. 最大回数に達したら       │
+              │    エラーとして処理         │
+              └───────────────────────────┘
+    </pre>
+  </div>
+
+  <h4 style="color:#14b8a6;">実装例: 完全な検証ループ（Python）</h4>
+  <pre>
+import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+def extract_with_validation(text: str, max_retries: int = 3) -> dict:
+    """検証ループ付きのデータ抽出"""
+
+    # 期待するスキーマの定義
+    required_fields = ["name", "email", "age"]
+
+    messages = [{
+        "role": "user",
+        "content": f"""以下のテキストから情報を抽出して、
+JSONで返してください。
+必須フィールド: name(文字列), email(文字列), age(数値)
+
+テキスト: {text}"""
+    }]
+
+    for attempt in range(max_retries):
+        # ---- ステップ1: AIにリクエスト ----
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            messages=messages
+        )
+        raw_output = response.content[0].text
+
+        # ---- ステップ2: JSON パース検証 ----
+        try:
+            data = json.loads(raw_output)
+        except json.JSONDecodeError as e:
+            # JSONが壊れている → フィードバックして再試行
+            messages.append({"role": "assistant", "content": raw_output})
+            messages.append({
+                "role": "user",
+                "content": f"JSONパースエラーです: {e}\n"
+                           f"正しいJSONで返してください。"
+            })
+            continue  # → ループの先頭に戻る
+
+        # ---- ステップ3: フィールド存在チェック ----
+        missing = [f for f in required_fields if f not in data]
+        if missing:
+            messages.append({"role": "assistant", "content": raw_output})
+            messages.append({
+                "role": "user",
+                "content": f"以下のフィールドが不足: {missing}\n"
+                           f"すべて含めて再出力してください。"
+            })
+            continue  # → ループの先頭に戻る
+
+        # ---- ステップ4: 型チェック ----
+        if not isinstance(data.get("age"), (int, float)):
+            messages.append({"role": "assistant", "content": raw_output})
+            messages.append({
+                "role": "user",
+                "content": "age は数値で返してください。"
+            })
+            continue  # → ループの先頭に戻る
+
+        # ---- 全検証クリア！ ----
+        return data
+
+    # 最大回数に達した場合
+    raise ValueError(f"{max_retries}回の試行で有効なデータを取得できませんでした")
+
+# 使用例
+result = extract_with_validation("鈴木太郎、35歳、suzuki@example.com")
+print(result)
+# → {"name": "鈴木太郎", "email": "suzuki@example.com", "age": 35}
+  </pre>
+
+  <h4 style="color:#14b8a6;margin-top:30px;">structured outputs で検証ループが不要になる例</h4>
+  <p>上記のコードは <code>strict: true</code> や <code>output_format</code> を使えば<span class="highlight">大幅に簡略化</span>できます。</p>
+  <pre>
+from pydantic import BaseModel
+from anthropic import Anthropic
+
+# スキーマを定義するだけ
+class PersonInfo(BaseModel):
+    name: str
+    email: str
+    age: int
+
+client = Anthropic()
+
+# これだけでOK！検証ループ不要！
+response = client.messages.parse(
+    model="claude-sonnet-4-6",
+    max_tokens=1024,
+    messages=[{
+        "role": "user",
+        "content": "抽出: 鈴木太郎、35歳、suzuki@example.com"
+    }],
+    output_format=PersonInfo  # ← スキーマ準拠が保証される
+)
+
+print(response.parsed_output)
+# → PersonInfo(name='鈴木太郎', email='suzuki@example.com', age=35)
+# JSONパースエラー → 起きない
+# フィールド不足 → 起きない
+# 型エラー → 起きない
+  </pre>
+
+  <h4 style="color:#14b8a6;margin-top:30px;">それでも検証ループが必要なケース</h4>
+  <div class="warning-box">
+    <span class="label">structured outputs でカバーできない検証</span>
+    <ul>
+      <li><strong>ビジネスロジック検証:</strong> 「年齢が0〜150の範囲内か」「メールアドレスが正しい形式か」→ JSON Schema の <code>minimum</code> / <code>pattern</code> は非対応</li>
+      <li><strong>外部データとの整合性:</strong> 「この商品IDがデータベースに存在するか」</li>
+      <li><strong>複数フィールド間の整合性:</strong> 「開始日が終了日より前か」</li>
+    </ul>
+    <p style="margin-top:12px;">これらの場合は、structured outputs で<span class="highlight">形式を保証</span>しつつ、<span class="highlight">ビジネスロジックだけ</span>検証ループで追加チェックするのがベストプラクティスです。</p>
+  </div>
+
+  <h4 style="color:#14b8a6;margin-top:30px;">出力一貫性を高めるテクニック（公式ドキュメント）</h4>
+  <div class="card-grid">
+    <div class="card">
+      <h4>テンプレート指定</h4>
+      <p>出力の形を事前に見せる。AIは見本に合わせて回答する。JSON / XML / カスタム形式に対応。</p>
+    </div>
+    <div class="card">
+      <h4>例で制約する</h4>
+      <p>Few-shotで「こう来たらこう返す」の例を見せる。抽象的な指示より例のほうがAIの理解度が高い。</p>
+    </div>
+    <div class="card">
+      <h4>検索で一貫性を保つ</h4>
+      <p>ナレッジベースから情報を取得して、それを元に回答させる。AIの「知識」ではなく「事実」に基づく回答になる。</p>
+    </div>
+    <div class="card">
+      <h4>タスクの分割</h4>
+      <p>複雑なタスクを小さなサブタスクに分割。各ステップでAIの注意力が集中し、一貫性が向上する。</p>
+    </div>
+  </div>
+
+  <!-- D4まとめ -->
+  <h3 style="font-size:1.6rem;border-bottom:3px solid #14b8a6;padding-bottom:8px;margin-top:50px;">D4 まとめ: 試験対策チェックリスト</h3>
+
+  <div class="success-box">
+    <span class="label">これが答えられれば合格ライン</span>
+    <ul style="line-height:2.2;">
+      <li>structured outputs の2つの方法（output_config と strict tool use）の違いを説明できる</li>
+      <li>Pydantic / Zod を使ったスキーマ定義の利点を知っている</li>
+      <li><code>additionalProperties: false</code> を設定すべき理由を説明できる</li>
+      <li>JSON Schema で使えるキーワード / 使えないキーワードを区別できる</li>
+      <li>検証ループのフロー（リクエスト→検証→フィードバック→再試行）を実装できる</li>
+      <li>strict: true を使えば検証ループが不要になる理由を説明できる</li>
+      <li>それでも検証ループが必要なケース（ビジネスロジック検証）を挙げられる</li>
+      <li>Few-shotプロンプティングで出力一貫性を高める方法を知っている</li>
+    </ul>
   </div>
 </section>
 
